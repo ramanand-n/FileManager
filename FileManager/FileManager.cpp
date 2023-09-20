@@ -40,7 +40,8 @@ int main()
     string SubDirectory;
     fs::path sourceFile{};
     fs::path targetParent{}, target{}, DeleteLocation{};
-        
+     
+    cout << "Welcome to simple filemanager\n";
     cout << "1. List Files\n2. Change Directory\n3. Copy Files\n4. Move Files\n5. Delete Files";
     cout << "\n6. Go to previous Directory\n7.Exit";
    
