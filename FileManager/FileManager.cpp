@@ -32,18 +32,13 @@ bool IsDirectory(string source)
     return false;
 }
 
-bool IsVaalidDirectory(string temperoryPath)
-{
-     ifstream test(temperoryPath);
-    return (test) ? true : false;
-
-}
-
 int main()
 {
     int choice, result;
+    bool IsValidDirectory=false;
     string Currentpath = "D:\\";
     string NextDirectory,Source,Target,copyCommand, moveCommand,deleteCommand,  temperoryPath;
+    string SubDirectory;
     fs::path sourceFile{};
     fs::path targetParent{}, target{}, DeleteLocation{};
         
@@ -69,15 +64,32 @@ int main()
         case 2:
             cout << "\nNext directory to change to: ";
             cin>>NextDirectory;
-            temperoryPath = Currentpath;
-            temperoryPath += "\\"+NextDirectory;
-            cout << Currentpath;
+                        
+            for (const auto& entry : fs::directory_iterator(Currentpath))
+            {
+                string StringPath = entry.path().generic_string();
+                SubDirectory= StringPath.substr(StringPath.find_last_of("/") + 1);
+                if (SubDirectory == NextDirectory)
+                {
+                    IsValidDirectory = true;
+                    break;
+                }
+                else
+                    IsValidDirectory = false;
+            }
 
-            
-            if (IsVaalidDirectory(temperoryPath))
+            /*if (IsVaalidDirectory(temperoryPath))
+            {
                 Currentpath = temperoryPath;
-             else
-                 cout<<"directory did not exist";
+                cout << Currentpath;
+            }*/
+            if(!IsValidDirectory)
+                cout<<"directory did not exist";
+            else
+            {
+                Currentpath += "\\" + NextDirectory;
+                cout << endl << Currentpath;
+            }
 
             break;
 
@@ -115,9 +127,9 @@ int main()
 
         case 4:
 
-            cout << "Enter Source file";
+            cout << "Enter Source file eg: drive:\\folder\filename : ";
             cin >> Source;
-            cout << "Enter Target Directory";
+            cout << "Enter Target Directory eg: drive:\\folder\filename : ";
             cin >> Target;
 
             Source =  string("\"") + Source +  string("\"");
@@ -146,7 +158,7 @@ int main()
         break;
 
         case 5:
-            cout << "Enter location of file to delete:";
+            cout << "Enter location of file to delete eg: drive:\\folder\filename : ";
             cin >> Source;
             
             if (IsDirectory(Source))
