@@ -1,7 +1,6 @@
 ﻿#include <string>
 #include <iostream>
 #include <filesystem>
-#include <fstream>
 #include <windows.h>
 using  namespace std;
 namespace fs = filesystem;
@@ -77,12 +76,7 @@ int main()
                 else
                     IsValidDirectory = false;
             }
-
-            /*if (IsVaalidDirectory(temperoryPath))
-            {
-                Currentpath = temperoryPath;
-                cout << Currentpath;
-            }*/
+                        
             if(!IsValidDirectory)
                 cout<<"directory did not exist";
             else
