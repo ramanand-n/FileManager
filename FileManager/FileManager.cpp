@@ -1,31 +1,208 @@
 ﻿#include <string>
-#include <string_view>
-#include <cstddef>
 #include <iostream>
 #include <filesystem>
+#include <fstream>
+#include <windows.h>
 using  namespace std;
 namespace fs = filesystem;
 
+class CopyException
+{
+public:
+    const char* what()
+    {
+        return "Error in  file copying";
+    }
+};
+
+class MoveException
+{
+public:
+    const char* what()
+    {
+        return " move operation failed.";
+    }
+};
+
+bool IsDirectory(string source)
+{
+    fs::path sourceFile(source);
+    if (fs::is_directory(sourceFile))
+        return true;
+    return false;
+}
+
+bool IsVaalidDirectory(string temperoryPath)
+{
+     ifstream test(temperoryPath);
+    return (test) ? true : false;
+
+}
+
 int main()
 {
-    int choice;
+    int choice, result;
     string Currentpath = "D:\\";
-
+    string NextDirectory,Source,Target,copyCommand, moveCommand,deleteCommand,  temperoryPath;
+    fs::path sourceFile{};
+    fs::path targetParent{}, target{}, DeleteLocation{};
+        
     cout << "1. List Files\n2. Change Directory\n3. Copy Files\n4. Move Files\n5. Delete Files";
-    cout << "Enter your choice: ";
-    cin >> choice;
-
-    switch (choice)
+    cout << "\n6. Go to previous Directory\n7.Exit";
+   
+    do
     {
-    case 1:
-        for (const auto& entry : fs::directory_iterator(Currentpath))
+        cout << "\nEnter your choice: ";
+        cin >> choice;
+
+        switch (choice)
         {
-           string StringPath = entry.path().generic_string();
-            //std::string stringpath = entry.path();
-           // stringpath.substr(stringpath.find("/") + 1);
-            cout << StringPath << endl;
-           
-        }
+        case 1:
+            cout << "current Path: " << Currentpath << endl;
+            for (const auto& entry : fs::directory_iterator(Currentpath))
+            {
+                string StringPath = entry.path().generic_string();
+               cout << StringPath.substr(StringPath.find_last_of("/") + 1) << '\n';
+            }
+            break;
+
+        case 2:
+            cout << "\nNext directory to change to: ";
+            cin>>NextDirectory;
+            temperoryPath = Currentpath;
+            temperoryPath += "\\"+NextDirectory;
+            cout << Currentpath;
+
+            
+            if (IsVaalidDirectory(temperoryPath))
+                Currentpath = temperoryPath;
+             else
+                 cout<<"directory did not exist";
+
+            break;
+
+        case 3:
+            cout << "Enter Source file";
+            cin >> Source;
+            cout << "Enter Target Directory";
+            cin >> Target;
+                        
+            Source =  string("\"") + Source +  string("\"");
+            Target =  string("\"") + Target +  string("\"");
+
+            try
+            {
+                copyCommand = string("xcopy") +  string(" ") + Source +  string(" ") + Target;
+
+
+                result = system(copyCommand.c_str());
+
+                if (result == 0) {
+                     cout << "Copy completed successfully." <<  endl;
+                }
+                else 
+                {
+                    CopyException e;
+                     throw  e;
+                }
+            }
+            catch( CopyException e)
+            {
+                cerr << "Error: " << e.what() << endl;
+            }
+
         break;
-    }
+
+        case 4:
+
+            cout << "Enter Source file";
+            cin >> Source;
+            cout << "Enter Target Directory";
+            cin >> Target;
+
+            Source =  string("\"") + Source +  string("\"");
+            Target =  string("\"") + Target +  string("\"");
+
+            try
+            {
+                moveCommand = string("move") + string(" ") + Source +  string(" ") + Target;
+
+                result = system(moveCommand.c_str());
+
+                if (result == 0)
+                {
+                    cout << "move completed successfully." << endl;
+                }
+                else
+                {
+                    MoveException e;
+                    throw  e;
+                }
+            }
+            catch(MoveException ex)
+            {
+                cerr << "Error: " << ex.what() << endl;
+            }
+        break;
+
+        case 5:
+            cout << "Enter location of file to delete:";
+            cin >> Source;
+            
+            if (IsDirectory(Source))
+            {
+                deleteCommand = string("rmdir") +  string(" ") + Source +  string(" ");
+                system(deleteCommand.c_str());
+            }
+            
+            else
+            {
+                if (Source[0] == 'D')
+                {
+                    deleteCommand = string("cd D:");
+                    system(deleteCommand.c_str());
+
+                    Source.erase(0, 3);
+                    deleteCommand = string("del") + string(" ") + Source + string(" ");
+                    result=system(deleteCommand.c_str());
+
+                    if (result == 0)
+                    {
+                        cout << "Directory Deletion completed." << endl;
+                    }
+                    else
+                    {
+                       cerr<<"deletion failed";
+                    }
+                    
+                }
+                else if (Source[0] == 'C')
+                {
+                    deleteCommand = string("cd C:");
+                    system(deleteCommand.c_str());
+
+                    Source.erase(0, 3);
+                    deleteCommand = string("del") +  string(" ") + Source +  string(" ");
+                    result=system(deleteCommand.c_str());
+                }
+               
+            }
+            break;
+
+        case 6:
+            Currentpath = Currentpath.substr(0, Currentpath.find_last_of("\\"));
+            cout << Currentpath;
+        break;
+
+        case 7:
+            break;
+
+        default:
+            cout << "invalid choice";
+            break;
+        }
+
+    } while (choice != 7);
+
+    return 0;
 }
